@@ -1,0 +1,65 @@
+erDiagram
+    USERS ||--o{ INCIDENTS : owns
+    USERS ||--o{ AUDIT_LOGS : performs
+    SOURCES ||--o{ EVENTS : produces
+    EVENTS ||--o{ EVENT_INDICATORS : has
+    INDICATORS ||--o{ EVENT_INDICATORS : identifies
+    INCIDENTS ||--o{ INCIDENT_EVENTS : groups
+    EVENTS ||--o{ INCIDENT_EVENTS : evidence
+
+    USERS {
+        uuid user_id PK
+        text email UK
+        text password_hash
+        user_role role
+    }
+    SOURCES {
+        uuid source_id PK
+        text name UK
+        text source_type
+        boolean enabled
+    }
+    EVENTS {
+        uuid event_id PK
+        uuid source_id FK
+        timestamptz occurred_at
+        event_severity severity
+        text summary
+        text raw_doc_id
+    }
+    INDICATORS {
+        uuid indicator_id PK
+        indicator_type type
+        text normalized_value
+    }
+    EVENT_INDICATORS {
+        uuid event_id PK, FK
+        uuid indicator_id PK, FK
+    }
+    INCIDENTS {
+        uuid incident_id PK
+        text title
+        event_severity severity
+        incident_status status
+        uuid owner_user_id FK
+    }
+    INCIDENT_EVENTS {
+        uuid incident_id PK, FK
+        uuid event_id PK, FK
+        text match_reason
+    }
+    AUDIT_LOGS {
+        uuid audit_id PK
+        uuid actor_user_id FK
+        text action
+        jsonb details
+    }
+
+    RAW_EVENTS_MONGODB {
+        objectId _id PK
+        object source_id
+        object payload
+        datetime received_at
+    }
+    EVENTS ||--|| RAW_EVENTS_MONGODB : references
+
